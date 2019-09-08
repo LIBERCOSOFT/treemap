@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+<link rel="stylesheet" type="text/css" href="./style.css" />
+<title>Treemap</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+
+    <div id="home">
+
+        <h1>Movie Sales</h1>
+
+        <h3>Top 100 Highest Grossing Movies Grouped By Genre</h3>
+    </div>
+
+    <div id="label"></div>
+
+    <script>
+    
+        let w = 1100;
+        let h = 650;
+
+        let svg = d3.select("#home")
+                      .append("svg")
+                      .attr("width", w + 200)
+                      .attr("height", h + 20)
+
+        //Another way to get a sole http request with some coded algorithms
+        d3.json("https://cdn.rawgit.com/freeCodeCamp/testable-projects-fcc/a80ce8f9/src/data/tree_map/movie-data.json", function(data){
+
+            let root = d3.hierarchy(data);
+            root.sum((d) => d.value)
+            
+            d3.treemap()
+              .size([w,h])
+              .padding(0.5)
+              (root)
+
+            svg.selectAll("rect")
+               .data(root.leaves())
+               .enter()
+               .append("rect")
+               .attr("x", (d) => d.x0)
+               .attr("y", (d) => d.y0)
+               .attr("width", (d) => d.x1 - d.x0)
+               .attr("height", (d) => d.y1 - d.y0)
+               .attr("transform", "translate(110, 20)")
+               .style("stroke", "white")
+               .style("fill", (d) => {
+                   switch(d.data.category){
+                       case "Action":
+                        return "dodgerblue"
+                        break;
+                       case "Adventure":
+                        return "lightgrey"
+                        break;
+                       case "Animation":
+                        return "lime"
+                        break;
+                       case "Comedy":
+                        return "lightsalmon"
+                        break;
+                       case "Drama":
+                        return "wheat"
+                        break;
+                       case "Family":
+                        return "lightgreen"
+                        break;
+                       case "Biography":
+                        return "lightcoral"
+                        break;
+                   }
+
+               })
+               .append("title")
+               .text((d) => {
+                   return "Name: " + d.data.name + "\n" +
+                          "Category: " + d.data.category + "\n" +
+                          "Value: " + d.data.value
+               })
+
+               svg.selectAll("text")
+                  .data(root.leaves())
+                  .enter()
+                  .append("text")
+                  .attr("x", (d) => d.x0)
+                  .attr("y", (d) => d.y0)
+                  .text((d) =>{
+                      if(d.data.name.length > 8){
+                        return d.data.name.slice(0,8) + "...";
+                      }else{
+                        return d.data.name;
+                      }
+                  })
+                  .attr("class", "text")
+                  .attr("transform", "translate(111,33)")
+
+        });
+
+        //creating another svg to append the labels of each film category with my given data
+        let label = d3.select("#label")
+                      .append("svg")
+                      .attr("width", 1000)
+                      .attr("height",160)
+
+        let circleData = [[140, 20, "Action", "dodgerblue"], [280, 20, "Adventure", "lightgrey"], [420, 20, "Comedy", "lightsalmon"], [140, 50, "Drama", "wheat"], [280, 50, "Animation", "lime"], [420, 50, "Family", "lightgreen"], [140, 80, "Biography", "lightcoral"]];
+
+            label.selectAll("circle")
+                .data(circleData)
+                .enter()
+                .append("circle")
+                .attr("cx", (d) => d[0] + 220)
+                .attr("cy", (d) => d[1])
+                .attr("r", 10)
+                .style("fill", (d) => d[3])
+
+            label.selectAll("text")
+                .data(circleData)
+                .enter()
+                .append("text")
+                .text((d) => { return d[2]})
+                .attr("x", (d) => d[0] + 230)
+                .attr("y", (d) => d[1] + 8)
+            
+            
+    </script>
+
+</body>
+
